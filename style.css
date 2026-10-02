@@ -1,0 +1,139 @@
+body {
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    background-color: #f3f3d7;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+}
+
+header {
+    background-color: wheat;
+}
+
+.header__wrapper {
+    display: flex;
+    justify-content: start;
+    gap: 10px;
+}
+
+.header__logo{
+    height: 100px;
+    width: 100px;
+}
+
+.register {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex: 1;
+}
+
+.register__form {
+    display: flex;
+    gap: 20px;
+    justify-content: center;  
+    align-items: center;   
+    flex-direction: column;       
+}
+
+.input {
+    height: 40px;
+    padding: 5px 10px;
+    width: 250px;
+    font-size: 18px;
+    box-sizing: border-box;
+}
+
+.title {
+    text-align: left;
+}
+
+.error {
+    font-size: 14px;
+    color: darkred;
+    font-weight: 100;
+}
+
+#profile {
+    height: 40px;
+    padding: 5px 10px;
+    font-size: 18px;
+    width: 200px;
+    background-color: white;
+    color: #4a4a2f;
+}
+
+.form {
+    display: flex;
+    justify-content: start;
+    align-items: center;  
+    gap: 10px;  
+    font-size: 18px;
+}
+
+.welcome {
+    text-align: center;
+    margin-bottom: 100px;
+}
+
+.container {
+    margin: 0 50px;
+}
+
+.student__fullname {
+    font-size: 30px;
+    margin-bottom: 100px;
+}
+
+.student__title {
+    font-size: 25px;
+}
+
+.subject__card {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    margin-bottom: 5px;
+}
+
+.point__wrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    margin-top: 50px;
+}
+
+.final__title {
+    margin: 0;
+}
+
+button[type="submit"] {
+    padding: 10px 30px;
+    font-size: 18px;
+    background-color: #4a4a2f;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+button[type="submit"]:hover {
+    background-color: #33331f;
+}
+
+footer {
+    background-color: wheat;
+    display: flex;
+    justify-content: center;
+    margin-top: auto;
+}
+
+
+
+
+
+
