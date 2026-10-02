@@ -66,21 +66,7 @@ else if($status != "tech"){
 
 ?>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
-    <title>Сайт абитуриента</title>
-</head>
-<body>
-    <header class="header">
-        <div class="header__wrapper">
-            <img src="logo.jpg" alt="logo" class="header__logo">
-            <h3 class="header__title">Калькулятор ЕГЭ 1.0</h3>
-        </div>
-    </header>
+<?php require_once __DIR__ . '/views/header.php'; ?>
     <main>
         <section class="welcome">
             <h1 class="welcome__title">Добро пожаловать!</h1>
@@ -104,8 +90,4 @@ else if($status != "tech"){
         </section>
         
     </main>
-    <footer class="footer">
-        <p class="footer__desc">(c) KISILISTA</p>
-    </footer>
-</body>
-</html>
+<?php require_once __DIR__ . '/views/footer.php'; ?>

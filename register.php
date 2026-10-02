@@ -32,21 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
-    <title>Форма регистрации</title>
-</head>
-<body>
-    <header class="header">
-        <div class="header__wrapper">
-            <img src="logo.jpg" alt="logo" class="header__logo">
-            <h3 class="header__title">Калькулятор ЕГЭ 1.0</h3>
-        </div>
-    </header>
+<?php require_once __DIR__ . '/views/header.php'; ?>
     <section class="register">
         <form action="register.php" method="POST" class = "register__form">
             <div class="form name__form">
@@ -74,8 +60,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <button type="submit">Зарегистрироваться</button> 
         </form>
     </section>
-    <footer class="footer">
-        <p class="footer__desc">(c) KISILISTA</p>
-    </footer>
-</body>
-</html>
+<?php require_once __DIR__ . '/views/footer.php'; ?>
