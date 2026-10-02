@@ -2,67 +2,29 @@
 session_start();
 // Логика основного раздела
 
-// Получаем данные
+// Подключение классов 
+require_once __DIR__ . '/src/Student.php';
+require_once __DIR__ . '/src/SubjectGenerator.php';
+
+// Получение данных
 $fullname = $_SESSION['fullname'] ?? '';
+$email = $_SESSION['email'] ?? '';
 $status = $_SESSION['profile'] ?? '';
 
-// Предметы для ЕГЭ
-$tech = ["Профильная математика","Физика","Информатика","Химия"];
-$hum = ["Обществознание","История","Литература","Иностранный язык"];
-$med = ["Химия","Биология"];
+// Генерация предметов и создание объекта абитуриента
+$generator = new SubjectGenerator();
+$data = $generator->generateForProfile($status);
+$student = new Student(
+    $fullname, 
+    $email, 
+    $status, 
+    $data['subjects'], 
+    $data['scores']
+    );
 
-// Массив для хранения выбранных предметов
-$student_subjects = [];
-// Массив для хранения сгенерированных баллов
-$student_points = [];
-// Итоговое количество баллов
-$points_sum = 0;
-
-// Добавление предметов по присланному статусу
-if($status === "tech"){
-    $random_sub = rand(1, 3);
-    $student_subjects[0] = "Русский язык";
-    $student_subjects[1] = $tech[0];
-    $student_subjects[2] = $tech[$random_sub];
-}
-else if($status === "human"){
-    $random_sub = rand(1, 3);
-    $student_subjects[0] = "Русский язык";
-    $student_subjects[1] = "Базовая математика";
-    $student_subjects[2] = $hum[0];
-    $student_subjects[3] = $hum[$random_sub];
-}
-else if($status === "med"){
-    $student_subjects[0] = "Русский язык";
-    $student_subjects[1] = "Базовая математика";
-    $student_subjects[2] = $med[0];
-    $student_subjects[3] = $med[1];
-}
-
-// Добавление баллов по предметам
-if($status === "tech"){
-    for($index = 0; $index < count($student_subjects); $index++){
-        $random_sub = rand(0, 100);        
-        $student_points[$index] = $random_sub;        
-    }
-    $points_sum = array_sum($student_points);
-}
-
-else if($status != "tech"){
-    for($index = 0; $index < count($student_subjects); $index++){
-        if ($index == 1) {
-            $random_sub = rand(2, 5);        
-            $student_points[$index] = $random_sub;
-        } else {
-            $random_sub = rand(0, 100);        
-            $student_points[$index] = $random_sub;
-        }
-    }
-    $points_sum = array_sum($student_points) - $student_points[1];
-}
-
-
-
+// Для удобства работы с массивами в цикле
+$subjects = $student->getSubjects();
+$scores = $student->getScores();
 
 ?>
 
@@ -76,15 +38,15 @@ else if($status != "tech"){
             <div class="container">
                 <p class="student__fullname"><?= htmlspecialchars($fullname) ?></p>
                 <h3 class="student__title">Ваши баллы</h3>
-                    <?php for ($index = 0; $index < count($student_subjects); $index++): ?>
+                    <?php for ($index = 0; $index < count($subjects); $index++): ?>
                         <div class="subject__card">
-                            <div class="subject"><?= htmlspecialchars($student_subjects[$index]) ?> :</div>
-                            <div class="points"><?= htmlspecialchars($student_points[$index]) ?></div>
+                            <div class="subject"><?= htmlspecialchars($subjects[$index]) ?> :</div>
+                            <div class="points"><?= htmlspecialchars($scores[$index]) ?></div>
                         </div>
                     <?php endfor; ?>
                     <div class="point__wrapper">
                         <h3 class="final__title">Итоговая сумма:</h3>
-                        <div class="final_score"><?= $points_sum ?></div>
+                        <div class="final_score"><?= $student->getSumScore() ?></div>
                     </div>
                 </div>
         </section>
