@@ -1,111 +1,163 @@
 <?php
-session_start();
-// Логика основного раздела
 
-// Получаем данные
-$fullname = $_SESSION['fullname'] ?? '';
-$status = $_SESSION['profile'] ?? '';
+require_once __DIR__ . '/autoload.php';
 
-// Предметы для ЕГЭ
-$tech = ["Профильная математика","Физика","Информатика","Химия"];
-$hum = ["Обществознание","История","Литература","Иностранный язык"];
-$med = ["Химия","Биология"];
+use App\Services\Router;
+use App\Models\Student;
+use App\Models\User;
+use App\Services\SubjectGenerator;
+use App\Services\AuthService;
 
-// Массив для хранения выбранных предметов
-$student_subjects = [];
-// Массив для хранения сгенерированных баллов
-$student_points = [];
-// Итоговое количество баллов
-$points_sum = 0;
+$router = new Router();
+$auth   = new AuthService();
 
-// Добавление предметов по присланному статусу
-if($status === "tech"){
-    $random_sub = rand(1, 3);
-    $student_subjects[0] = "Русский язык";
-    $student_subjects[1] = $tech[0];
-    $student_subjects[2] = $tech[$random_sub];
-}
-else if($status === "human"){
-    $random_sub = rand(1, 3);
-    $student_subjects[0] = "Русский язык";
-    $student_subjects[1] = "Базовая математика";
-    $student_subjects[2] = $hum[0];
-    $student_subjects[3] = $hum[$random_sub];
-}
-else if($status === "med"){
-    $student_subjects[0] = "Русский язык";
-    $student_subjects[1] = "Базовая математика";
-    $student_subjects[2] = $med[0];
-    $student_subjects[3] = $med[1];
-}
+// 1. Главная страница (GET)
 
-// Добавление баллов по предметам
-if($status === "tech"){
-    for($index = 0; $index < count($student_subjects); $index++){
-        $random_sub = rand(0, 100);        
-        $student_points[$index] = $random_sub;        
-    }
-    $points_sum = array_sum($student_points);
-}
-
-else if($status != "tech"){
-    for($index = 0; $index < count($student_subjects); $index++){
-        if ($index == 1) {
-            $random_sub = rand(2, 5);        
-            $student_points[$index] = $random_sub;
-        } else {
-            $random_sub = rand(0, 100);        
-            $student_points[$index] = $random_sub;
-        }
-    }
-    $points_sum = array_sum($student_points) - $student_points[1];
-}
-
-
-
-
-?>
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
-    <title>Сайт абитуриента</title>
-</head>
-<body>
-    <header class="header">
-        <div class="header__wrapper">
-            <img src="logo.jpg" alt="logo" class="header__logo">
-            <h3 class="header__title">Калькулятор ЕГЭ 1.0</h3>
-        </div>
-    </header>
-    <main>
-        <section class="welcome">
-            <h1 class="welcome__title">Добро пожаловать!</h1>
-            <p class="welcome__desc">Это сайт Калькулятор ЕГЭ. Здесь вы можете посмотреть ваши текущие баллы ЕГЭ</p>
-        </section>
-        <section class="student">
-            <div class="container">
-                <p class="student__fullname"><?= htmlspecialchars($fullname) ?></p>
-                <h3 class="student__title">Ваши баллы</h3>
-                    <?php for ($index = 0; $index < count($student_subjects); $index++): ?>
-                        <div class="subject__card">
-                            <div class="subject"><?= htmlspecialchars($student_subjects[$index]) ?> :</div>
-                            <div class="points"><?= htmlspecialchars($student_points[$index]) ?></div>
-                        </div>
-                    <?php endfor; ?>
-                    <div class="point__wrapper">
-                        <h3 class="final__title">Итоговая сумма:</h3>
-                        <div class="final_score"><?= $points_sum ?></div>
-                    </div>
+$router->get('/', function() use ($auth) {
+    if (!$auth->check()) {
+        // Главная страница для неавторизованных гостей
+        require_once __DIR__ . '/views/header.php';
+        ?>
+        <main>
+            <section class="welcome">
+                <h1 class="welcome__title">Добро пожаловать в Калькулятор ЕГЭ!</h1>
+                <p class="welcome__desc">Для просмотра и расчёта баллов войдите в аккаунт или зарегистрируйтесь.</p>
+            </section>
+            <section class="register">
+                <div class="form">
+                    <a href="/login"><button type="submit">Войти</button></a>
+                    <a href="/register"><button type="submit">Зарегистрироваться</button></a>
                 </div>
-        </section>
+            </section>
+        </main>
+        <?php
+        require_once __DIR__ . '/views/footer.php';
+        return;
+    }
+
+    // Если пользователь авторизован — берем данные из сессии
+    $user     = $auth->user();
+    $fullname = $user['fullname'] ?? 'Студент';
+    $status   = $user['profile']  ?? 'tech';
+
+    // 1. Проверяем, сохранены ли уже баллы в БД
+    $subjectsData = !empty($user['subjects_data']) 
+        ? json_decode($user['subjects_data'], true) 
+        : null;
+
+    // 2. Если баллов нет (NULL) — генерируем один раз и сохраняем в БД
+    if (!$subjectsData) {
+        $generator    = new SubjectGenerator();
+        $subjectsData = $generator->generateForProfile($status);
+
+        $userModel = new User();
+        $userModel->update($user['id'], [
+            'subjects_data' => json_encode($subjectsData, JSON_UNESCAPED_UNICODE)
+        ]);
         
-    </main>
-    <footer class="footer">
-        <p class="footer__desc">(c) KISILISTA</p>
-    </footer>
-</body>
-</html>
+        // Обновляем данные текущего пользователя в сессии
+        $_SESSION['user']['subjects_data'] = json_encode($subjectsData, JSON_UNESCAPED_UNICODE);
+    }
+
+    // 3. Создаем модель студента с зафиксированными баллами
+    $student = new Student(
+        $fullname,
+        $user['email'] ?? '',
+        $status,
+        $subjectsData['subjects'] ?? [],
+        $subjectsData['scores']   ?? []
+    );
+
+    $subjects = $student->getSubjects();
+    $scores   = $student->getScores();
+
+    require_once __DIR__ . '/views/home.php';
+});
+
+
+// 2. Страница входа (GET)
+
+$router->get('/login', function() {
+    require_once __DIR__ . '/views/login.php';
+});
+
+
+// 3. Обработка формы входа (POST)
+
+$router->post('/login', function() use ($auth) {
+    $email    = trim($_POST['email'] ?? '');
+    $password = trim($_POST['password'] ?? '');
+
+    if ($auth->login($email, $password)) {
+        header('Location: /');
+        exit;
+    }
+
+    $error = "Неверный email или пароль";
+    require_once __DIR__ . '/views/login.php';
+});
+
+
+// 4. Страница регистрации (GET)
+
+$router->get('/register', function() {
+    require_once __DIR__ . '/views/register.php';
+});
+
+
+// 5. Обработка формы регистрации (POST)
+
+$router->post('/register', function() use ($auth) {
+    $fullname = trim($_POST['fullname'] ?? '');
+    $email    = trim($_POST['email'] ?? '');
+    $password = trim($_POST['password'] ?? '');
+    $profile  = trim($_POST['profile'] ?? 'tech');
+
+    $fullname_error = '';
+    $email_error    = '';
+    $password_error = '';
+
+    // Валидация полей
+    if ($fullname === '') {
+        $fullname_error = 'Введите ФИО';
+    }
+    if ($email === '') {
+        $email_error = 'Введите Email';
+    }
+    if ($password === '') {
+        $password_error = 'Введите пароль';
+    }
+
+    if ($fullname_error !== '' || $email_error !== '' || $password_error !== '') {
+        require_once __DIR__ . '/views/register.php';
+        return;
+    }
+
+    // Генерация баллов в момент создания аккаунта
+    $generator    = new SubjectGenerator();
+    $subjectsData = $generator->generateForProfile($profile);
+
+    // Сохранение пользователя вместе со сгенерированными баллами
+    if ($auth->register($fullname, $email, $password, $profile, $subjectsData)) {
+        $auth->login($email, $password);
+        header('Location: /');
+        exit;
+    }
+
+    $error = 'Пользователь с таким Email уже зарегистрирован';
+    require_once __DIR__ . '/views/register.php';
+});
+
+
+// 6. Выход из системы (GET)
+
+$router->get('/logout', function() use ($auth) {
+    $auth->logout();
+    header('Location: /login');
+    exit;
+});
+
+
+// Запуск маршрутизатора
+
+$router->dispatch();
