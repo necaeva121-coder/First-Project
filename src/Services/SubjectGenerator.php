@@ -1,5 +1,7 @@
 <?php
 
+namespace App\Services;
+
 class SubjectGenerator
 {
     private array $tech = ["Профильная математика", "Физика", "Информатика", "Химия"];

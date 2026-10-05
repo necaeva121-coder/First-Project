@@ -1,34 +1,41 @@
 <?php
-// Создание класса Student
-class Student {
-    // атрибуты основные
-    private string $fullName;
+
+namespace App\Models;
+
+class Student extends Model {
+    protected string $table = 'users';
+
+    private string $fullname;
     private string $email;
-    private string $profile;
+    private string $status;
     private array $subjects;
     private array $scores;
 
-    // конструктор
-    public function __construct(string $fullName, string $email, string $profile, array $subjects, array $scores)
-    {
-        $this->fullName = $fullName;
+    public function __construct(
+        string $fullname = '',
+        string $email = '',
+        string $status = '',
+        array $subjects = [],
+        array $scores = []
+    ) {
+        parent::__construct(); // Вызываем конструктор родительской модели
+
+        $this->fullname = $fullname;
         $this->email = $email;
-        $this->profile = $profile;
+        $this->status = $status;
         $this->subjects = $subjects;
         $this->scores = $scores;
     }
 
-    // геттеры
-    public function getFullName(): string {return $this->fullName;}
-    public function getSubjects() : array {return $this->subjects;}
-    public function getScores(): array {return $this->scores;}
-    public function getEmail(): string { return $this->email; }
-    public function getProfile(): string { return $this->profile; }
-    
-    // Метод расчёта суммы баллов
-    public function getSumScore(): int 
-    {
+    public function getSubjects(): array {
+        return $this->subjects;
+    }
+
+    public function getScores(): array {
+        return $this->scores;
+    }
+
+    public function getSumScore(): int {
         return array_sum($this->scores);
     }
 }
-?>
